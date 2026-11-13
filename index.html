@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project SIYA - Core Interface</title>
+    <style>
+        body { background-color: #0d1117; color: #c9dd20; font-family: sans-serif; margin: 0; padding: 15px; }
+        .container { max-width: 800px; margin: auto; background: #161b22; padding: 20px; border-radius: 12px; }
+        h1 { text-align: center; color: #ff7b72; font-size: 22px; }
+        #chat-box { height: 350px; overflow-y: scroll; border: 1px solid #30363d; padding: 15px; border-radius: 6px; background: #0d1117; margin-bottom: 15px; }
+        .message { margin-bottom: 12px; line-height: 1.4; }
+        .user-msg { color: #58a6ff; text-align: right; }
+        .siya-msg { color: #3fb950; text-align: left; }
+        .input-group { display: flex; gap: 8px; }
+        input, button { padding: 10px; border-radius: 6px; border: 1px solid #30363d; background: #21262d; color: white; font-size: 15px; }
+        input[type="text"] { flex: 1; }
+        button { background: #238636; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>PROJECT "SIYA"</h1>
+    <div style="margin-bottom: 10px;">Code: <input type="password" id="secretCode" value="1064" style="width: 60px; padding: 4px;"></div>
+    <div id="chat-box">
+        <div class="message siya-msg"><strong>SIYA:</strong> Main taiyar hoon, Akash. Bolo!</div>
+    </div>
+    <div class="input-group">
+        <input type="text" id="userInput" placeholder="Yahan likhein..." onkeypress="if(event.key === 'Enter') sendMessage()">
+        <button onclick="sendMessage()">Bhej Do</button>
+    </div>
+</div>
+<script>
+    async function sendMessage() {
+        const inputField = document.getElementById("userInput");
+        const chatBox = document.getElementById("chat-box");
+        const codeField = document.getElementById("secretCode").value;
+        const text = inputField.value.trim();
+        if (!text) return;
+        chatBox.innerHTML += `<div class="message user-msg"><strong>Akash:</strong> ${text}</div>`;
+        inputField.value = "";
+        try {
+            const response = await fetch("/api/siya/interact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: "Akash", code: codeField, message: text })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                chatBox.innerHTML += `<div class="message siya-msg"><strong>SIYA:</strong> ${data.siya_reply}</div>`;
+            } else {
+                chatBox.innerHTML += `<div class="message siya-msg" style="color: #ff7b72;"><strong>SIYA:</strong> ${data.detail}</div>`;
+            }
+        } catch (e) {
+            chatBox.innerHTML += `<div class="message siya-msg" style="color: #ff7b72;">Error connecting to server.</div>`;
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
+</body>
+</html>
